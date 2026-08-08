@@ -2,12 +2,14 @@
 // 方針：HTML本体は常に最新を優先（ネットワーク優先）
 //       アイコン等の静的アセットはキャッシュ優先（速度優先）
 
-const CACHE_NAME = 'tatekae-cho-cache-v4';
+const CACHE_NAME = 'tatekae-cho-cache-v5';
 const STATIC_ASSETS = [
   './icon-192.png',
   './icon-512.png',
   './icon-180.png',
   './icon-32.png',
+  './icon-192-maskable.png',
+  './icon-512-maskable.png',
   './manifest.json'
 ];
 
