@@ -34,7 +34,7 @@
   body{
     margin:0;
     min-height:100vh;
-    min-height:100dvh;
+    min-height:calc(var(--vh, 1vh) * 100);
     background:var(--bg);
     font-family:'Zen Maru Gothic', 'Noto Sans JP', sans-serif;
     color:var(--ink);
@@ -46,7 +46,7 @@
     width:100%;
     max-width:420px;
     min-height:100vh;
-    min-height:100dvh;
+    min-height:calc(var(--vh, 1vh) * 100);
     background:var(--bg);
     position:relative;
     padding-bottom:24px;
@@ -366,7 +366,7 @@
     width:100%;
     max-width:420px;
     min-height:100vh;
-    min-height:100dvh;
+    min-height:calc(var(--vh, 1vh) * 100);
     background:var(--bg);
     padding:20px 22px 28px;
     display:none;
@@ -1824,6 +1824,18 @@
   renderHome();
   showScreen('homeScreen');
 
+})();
+
+/* 画面の高さをJSで実測してセット（アドレスバーの出入りに追従させるため） */
+(function () {
+  "use strict";
+  function setRealVH() {
+    var vh = window.innerHeight * 0.01;
+    document.documentElement.style.setProperty('--vh', vh + 'px');
+  }
+  setRealVH();
+  window.addEventListener('resize', setRealVH);
+  window.addEventListener('orientationchange', setRealVH);
 })();
 
 if ('serviceWorker' in navigator) {
