@@ -836,7 +836,7 @@
   </div>
 
   <div class="summary-block">
-    <div class="summary-label">未精算の合計</div>
+    <div class="summary-label">未精算の合計（全期間）</div>
     <div class="summary-value" id="totalUnpaid">¥0</div>
   </div>
 
@@ -1167,7 +1167,8 @@
 
   /* ===== ホーム画面：一覧描画 ===== */
   function renderHome(){
-    var records = loadRecords().filter(function(r){
+    var allRecords = loadRecords();
+    var records = allRecords.filter(function(r){
       return monthKeyOf(r.date) === state.currentMonth;
     });
     records.sort(function(a,b){ return b.date.localeCompare(a.date); });
@@ -1177,9 +1178,12 @@
     list.innerHTML = '';
 
     var totalUnpaid = 0;
+    allRecords.forEach(function(r){
+      if(!r.settled) totalUnpaid += recordTotal(r);
+    });
+
     records.forEach(function(r){
       var total = recordTotal(r);
-      if(!r.settled) totalUnpaid += total;
 
       var card = document.createElement('div');
       card.className = 'store-card';
