@@ -39,7 +39,7 @@
     color:var(--ink);
     display:flex;
     justify-content:center;
-    padding:0 0 40px;
+    padding:0;
   }
   .app{
     width:100%;
@@ -907,7 +907,6 @@
     </div>
 
     <div class="summary-block">
-      <div class="summary-label" id="monthUnpaidLabel">未精算</div>
       <div class="summary-value" id="monthUnpaid">¥0</div>
       <div class="summary-alltime" id="allTimeToggle">
         <span>全期間の未精算：<span class="summary-alltime-amt" id="allTimeUnpaid">¥0</span></span>
@@ -1264,7 +1263,6 @@
     var allTimeUnpaid = 0;
     unpaidAll.forEach(function(r){ allTimeUnpaid += recordTotal(r); });
 
-    document.getElementById('monthUnpaidLabel').textContent = monthLabelOf(state.currentMonth)+'の未精算';
     document.getElementById('monthUnpaid').textContent = yen(monthUnpaid);
     document.getElementById('allTimeUnpaid').textContent = yen(allTimeUnpaid);
     renderAllTimeBreakdown(unpaidAll);
