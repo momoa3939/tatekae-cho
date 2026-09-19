@@ -512,7 +512,27 @@
     margin-bottom:10px;
   }
   .item-input-row .item-name-input{ flex:1; }
-  .item-input-row .item-price-input{ width:96px; }
+  .price-input-wrap{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex-shrink:0;
+  }
+  .item-input-row .item-price-input{ width:74px; }
+  .calc-icon-btn{
+    width:34px; height:34px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#F4ECE3;
+    border:1px solid var(--line-card);
+    border-radius:8px;
+    color:var(--ink-soft);
+    padding:0;
+    cursor:pointer;
+  }
+  .calc-icon-btn:active{ background:var(--sage-soft); }
   .item-remove-btn{
     background:none;
     border:none;
@@ -527,7 +547,7 @@
     display:block;
     width:100%;
     background:none;
-    border:1.5px dashed var(--line-card);
+    border:1.5px solid var(--line-card);
     border-radius:10px;
     padding:10px;
     font-family:'Zen Maru Gothic', sans-serif;
@@ -692,6 +712,89 @@
     border:1px solid #A27D7F;
     color:#fff;
   }
+  /* 電卓シート */
+  .calc-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(80,48,24,0.35);
+    display:none;
+    align-items:flex-end;
+    justify-content:center;
+    z-index:110;
+  }
+  .calc-overlay.open{ display:flex; }
+  .calc-sheet{
+    background:var(--bg);
+    border-radius:20px 20px 0 0;
+    padding:18px 18px 26px;
+    max-width:420px;
+    width:100%;
+  }
+  .calc-display{
+    font-family:'DotGothic16', 'Zen Maru Gothic', sans-serif;
+    font-size:30px;
+    font-weight:700;
+    text-align:right;
+    color:var(--ink);
+    background:#F4ECE3;
+    border-radius:12px;
+    padding:14px 16px;
+    margin-bottom:14px;
+    overflow-x:auto;
+    white-space:nowrap;
+  }
+  .calc-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .calc-grid button{
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:18px;
+    font-weight:700;
+    border:1px solid var(--line-card);
+    background:var(--card);
+    color:var(--ink);
+    border-radius:10px;
+    padding:14px 0;
+    cursor:pointer;
+  }
+  .calc-grid button:active{ transform:scale(0.97); }
+  .calc-grid button.op{ background:var(--sage-soft); }
+  .calc-grid button.eq{
+    background:var(--mustard-deep);
+    color:#fff;
+    border-color:var(--mustard-deep);
+  }
+  .calc-grid button.zero{ grid-column:span 2; }
+  .calc-use-btn{
+    display:block;
+    width:100%;
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:15px;
+    font-weight:700;
+    background:#F3C16B;
+    color:var(--ink);
+    border:1px solid var(--line-card);
+    border-radius:13px;
+    padding:13px;
+    cursor:pointer;
+  }
+  .calc-use-btn:active{ transform:scale(0.98); }
+  .calc-cancel-link{
+    display:block;
+    width:100%;
+    text-align:center;
+    margin-top:10px;
+    font-size:13px;
+    color:var(--ink-soft);
+    background:none;
+    border:none;
+    padding:8px;
+    cursor:pointer;
+  }
+
   .toast{
     position:fixed;
     bottom:26px;
@@ -886,6 +989,35 @@
       </div>
     </div>
   </div>
+  <div class="calc-overlay" id="calcOverlay">
+    <div class="calc-sheet">
+      <div class="calc-display" id="calcDisplay">0</div>
+      <div class="calc-grid">
+        <button type="button" data-key="C">C</button>
+        <button type="button" data-key="⌫">⌫</button>
+        <button type="button" data-key="%">%</button>
+        <button type="button" data-key="÷" class="op">÷</button>
+        <button type="button" data-key="7">7</button>
+        <button type="button" data-key="8">8</button>
+        <button type="button" data-key="9">9</button>
+        <button type="button" data-key="×" class="op">×</button>
+        <button type="button" data-key="4">4</button>
+        <button type="button" data-key="5">5</button>
+        <button type="button" data-key="6">6</button>
+        <button type="button" data-key="−" class="op">−</button>
+        <button type="button" data-key="1">1</button>
+        <button type="button" data-key="2">2</button>
+        <button type="button" data-key="3">3</button>
+        <button type="button" data-key="＋" class="op">＋</button>
+        <button type="button" data-key="0" class="zero">0</button>
+        <button type="button" data-key=".">.</button>
+        <button type="button" data-key="=" class="eq">=</button>
+      </div>
+      <button type="button" class="calc-use-btn" id="calcUseBtn">この金額を入力する</button>
+      <button type="button" class="calc-cancel-link" id="calcCancelBtn">キャンセル</button>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
 </div>
@@ -1191,12 +1323,18 @@
     row.className = 'item-input-row';
     row.innerHTML =
       '<input type="text" class="form-input item-name-input" placeholder="品目名">'+
-      '<input type="number" inputmode="numeric" class="form-input item-price-input" placeholder="金額">'+
+      '<div class="price-input-wrap">'+
+        '<input type="number" inputmode="numeric" class="form-input item-price-input" placeholder="金額">'+
+        '<button type="button" class="calc-icon-btn" aria-label="電卓で計算"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"></rect><line x1="8" y1="6" x2="16" y2="6"></line><path d="M8 10h.01"></path><path d="M12 10h.01"></path><path d="M16 10h.01"></path><path d="M8 14h.01"></path><path d="M12 14h.01"></path><line x1="16" y1="14" x2="16" y2="18"></line><path d="M8 18h.01"></path><path d="M12 18h.01"></path></svg></button>'+
+      '</div>'+
       '<button type="button" class="item-remove-btn" aria-label="削除">×</button>';
     row.querySelector('.item-name-input').value = name || '';
     row.querySelector('.item-price-input').value = (price===undefined || price===null) ? '' : price;
     row.querySelector('.item-remove-btn').addEventListener('click', function(){
       row.remove();
+    });
+    row.querySelector('.calc-icon-btn').addEventListener('click', function(){
+      openCalculator(row.querySelector('.item-price-input'));
     });
     wrap.appendChild(row);
   }
@@ -1469,6 +1607,99 @@
     document.getElementById('confirmOverlay').classList.remove('open');
     if(confirmCallback) confirmCallback();
     confirmCallback = null;
+  });
+
+  /* ===== 電卓シート ===== */
+  var calc = { expr: '0', fresh: true, targetInput: null };
+
+  function openCalculator(inputEl){
+    calc.targetInput = inputEl;
+    var v = inputEl.value;
+    calc.expr = (v !== undefined && v !== null && v !== '') ? String(v) : '0';
+    calc.fresh = true;
+    updateCalcDisplay();
+    document.getElementById('calcOverlay').classList.add('open');
+  }
+  function closeCalculator(){
+    document.getElementById('calcOverlay').classList.remove('open');
+    calc.targetInput = null;
+  }
+  function updateCalcDisplay(){
+    document.getElementById('calcDisplay').textContent = calc.expr;
+  }
+  function calcEvaluate(){
+    try{
+      var expr = calc.expr
+        .replace(/×/g, '*')
+        .replace(/÷/g, '/')
+        .replace(/−/g, '-')
+        .replace(/%/g, '/100');
+      if(!/^[0-9+\-*/.\s]+$/.test(expr)) throw new Error('invalid');
+      var result = Function('"use strict";return (' + expr + ')')();
+      if(typeof result !== 'number' || !isFinite(result)) throw new Error('invalid');
+      return Math.round(result * 1e6) / 1e6;
+    }catch(e){
+      return null;
+    }
+  }
+  function calcPressKey(key){
+    if(key === 'C'){
+      calc.expr = '0';
+      calc.fresh = true;
+      updateCalcDisplay();
+      return;
+    }
+    if(key === '⌫'){
+      if(calc.expr.length > 1){
+        calc.expr = calc.expr.slice(0, -1);
+      }else{
+        calc.expr = '0';
+        calc.fresh = true;
+      }
+      updateCalcDisplay();
+      return;
+    }
+    if(key === '='){
+      var result = calcEvaluate();
+      calc.expr = (result === null) ? 'エラー' : String(result);
+      calc.fresh = true;
+      updateCalcDisplay();
+      return;
+    }
+    var isDigit = /[0-9.]/.test(key);
+    if(calc.expr === 'エラー'){
+      calc.expr = isDigit ? key : ('0' + key);
+      calc.fresh = false;
+      updateCalcDisplay();
+      return;
+    }
+    if(calc.fresh){
+      calc.expr = isDigit ? (key === '.' ? '0.' : key) : (calc.expr + key);
+      calc.fresh = false;
+    }else{
+      calc.expr += key;
+    }
+    updateCalcDisplay();
+  }
+  document.querySelectorAll('#calcOverlay .calc-grid button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      calcPressKey(btn.getAttribute('data-key'));
+    });
+  });
+  document.getElementById('calcUseBtn').addEventListener('click', function(){
+    var finalVal;
+    if(/[+\-×÷%]/.test(calc.expr)){
+      finalVal = calcEvaluate();
+    }else{
+      finalVal = (calc.expr === 'エラー') ? null : Number(calc.expr);
+    }
+    if(calc.targetInput && finalVal !== null && finalVal !== undefined && isFinite(finalVal)){
+      calc.targetInput.value = finalVal;
+    }
+    closeCalculator();
+  });
+  document.getElementById('calcCancelBtn').addEventListener('click', function(){
+    closeCalculator();
   });
 
   /* ===== 初期化 ===== */
