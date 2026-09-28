@@ -1028,7 +1028,7 @@
         </div>
         <div class="settings-card-info">
           <div class="settings-card-title">データのバックアップ</div>
-          <div class="settings-card-desc">記録をJSONファイルで保存</div>
+          <div class="settings-card-desc">ドライブなどに保存</div>
         </div>
         <span class="chevron">›</span>
       </div>
@@ -1043,7 +1043,7 @@
         <span class="chevron">›</span>
       </div>
     </div>
-    <input type="file" id="restoreFileInput" accept="application/json" style="display:none;">
+    <input type="file" id="restoreFileInput" accept=".json,.txt,application/json,text/plain" style="display:none;">
   </div>
 
   <!-- ===== 月の管理画面 ===== -->
@@ -1656,23 +1656,51 @@
   }
 
   /* --- バックアップ --- */
+  // スマホでは共有メニューを開いて「ドライブ」などに保存先を選べるようにする
+  // (共有機能は .json を受け付けないため、共有するときだけ .txt 形式にする。中身は同じ)
+  // 共有に対応していない環境では、今まで通りダウンロード保存
   document.getElementById('doBackup').addEventListener('click', function(){
     var data = {
       records: loadRecords(),
       storeStats: loadStoreStats(),
       exportedAt: new Date().toISOString()
     };
-    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    var url = URL.createObjectURL(blob);
-    var a = document.createElement('a');
-    var d = new Date();
-    a.href = url;
-    a.download = 'tatekaecho-backup-'+d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate())+'.json';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-    showToast('バックアップを書き出しました');
+    var json = JSON.stringify(data, null, 2);
+    var baseName = 'tatekaecho-backup-' + todayStr();
+
+    function downloadBackup(){
+      var blob = new Blob([json], { type: 'application/json' });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = baseName + '.json';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+      showToast('バックアップを書き出しました');
+    }
+
+    var file = null;
+    try{
+      file = new File([json], baseName + '.txt', { type: 'text/plain' });
+    }catch(err){
+      file = null;
+    }
+
+    if(file && navigator.canShare && navigator.canShare({ files: [file] })){
+      navigator.share({ files: [file], title: baseName }).then(function(){
+        showToast('バックアップを共有しました');
+      }).catch(function(err){
+        if(err && err.name === 'AbortError'){
+          showToast('バックアップをキャンセルしました');
+        }else{
+          downloadBackup();
+        }
+      });
+    }else{
+      downloadBackup();
+    }
   });
 
   /* --- 復元 --- */
