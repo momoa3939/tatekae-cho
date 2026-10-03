@@ -314,17 +314,6 @@
     flex-shrink:0;
   }
   .status-dot.settled{ opacity:0.35; }
-  .payer-badge{
-    width:22px; height:22px;
-    border-radius:50%;
-    flex-shrink:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:10.5px;
-    font-weight:700;
-    color:#3a2d18;
-  }
   .store-info{
     flex:1;
     min-width:0;
@@ -476,19 +465,21 @@
   }
   .detail-badges{
     display:flex;
-    align-items:center;
+    flex-direction:column;
+    align-items:flex-start;
     gap:8px;
   }
-  .detail-payer-badge{
-    width:26px; height:26px;
-    border-radius:50%;
-    flex-shrink:0;
+  .detail-payer-line{
     display:flex;
     align-items:center;
-    justify-content:center;
-    font-size:11.5px;
-    font-weight:700;
-    color:#3a2d18;
+    gap:6px;
+    font-size:13.5px;
+    color:var(--ink);
+  }
+  .detail-payer-dot{
+    width:9px; height:9px;
+    border-radius:50%;
+    flex-shrink:0;
   }
   .detail-date-badge{
     display:flex;
@@ -715,20 +706,16 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:6px;
     padding:10px 4px;
     border-radius:9px;
+    border:1px solid transparent;
     font-family:'Zen Maru Gothic', sans-serif;
     font-size:13.5px;
     color:var(--ink-soft);
+    background:none;
     cursor:pointer;
   }
-  .payer-toggle-btn.active{ font-weight:700; color:var(--ink); }
-  .payer-toggle-dot{
-    width:9px; height:9px;
-    border-radius:50%;
-    flex-shrink:0;
-  }
+  .payer-toggle-btn.active{ font-weight:700; }
 
   /* 立て替える人：設定の一覧・編集 */
   .payers-list{
@@ -1089,8 +1076,11 @@
 
     <div class="detail-summary-row">
       <div class="detail-badges">
-        <span class="detail-payer-badge" id="detailPayerBadge"></span>
         <div class="detail-date-badge" id="detailDateBadge">6月5日（木）</div>
+        <div class="detail-payer-line" id="detailPayerLine">
+          <span class="detail-payer-dot" id="detailPayerDot"></span>
+          <span id="detailPayerText"></span>
+        </div>
       </div>
       <div class="detail-total-block">
         <div class="detail-total-label">合計</div>
@@ -1333,7 +1323,17 @@
     return (name||'？').slice(0,1);
   }
   function payerTextColor(bg){
-    return '#3a2d18';
+    var hex = (bg||'').replace('#','');
+    if(hex.length!==6) return '#503018';
+    var r = parseInt(hex.slice(0,2),16)/255;
+    var g = parseInt(hex.slice(2,4),16)/255;
+    var b = parseInt(hex.slice(4,6),16)/255;
+    function lin(c){ return c<=0.03928 ? c/12.92 : Math.pow((c+0.055)/1.055, 2.4); }
+    var lum = 0.2126*lin(r) + 0.7152*lin(g) + 0.0722*lin(b);
+    // 濃い茶色の文字 (#503018) とのコントラスト比を計算し、足りなければ白文字にする
+    var darkLum = 0.03888;
+    var contrastWithDark = (Math.max(lum,darkLum)+0.05) / (Math.min(lum,darkLum)+0.05);
+    return contrastWithDark >= 4.5 ? '#503018' : '#FFFEFD';
   }
 
   /* 記録に立て替え人の情報がない古いデータを、最初の登録者に割り振る */
@@ -1527,7 +1527,6 @@
       card.setAttribute('data-id', r.id);
       card.innerHTML =
         '<span class="status-dot'+(r.settled?' settled':'')+'"></span>'+
-        '<span class="payer-badge"></span>'+
         '<div class="store-info">'+
           '<div class="store-name"></div>'+
           '<div class="store-date"></div>'+
@@ -1540,9 +1539,6 @@
           '<span class="chevron">›</span>'+
         '</div>';
       card.querySelector('.status-dot').style.background = payer.color;
-      var badgeEl = card.querySelector('.payer-badge');
-      badgeEl.style.background = payer.color;
-      badgeEl.textContent = payerInitial(payer.name);
       card.querySelector('.store-name').textContent = r.store;
       card.querySelector('.store-date').textContent = dateLabelShort(r.date);
       card.querySelector('.store-amount').textContent = yen(total);
@@ -1641,10 +1637,8 @@
     document.getElementById('detailDateBadge').textContent = dateLabelWithWeek(rec.date);
     document.getElementById('detailTotalValue').textContent = yen(recordTotal(rec));
     var payer = getPayerById(rec.payerId);
-    var payerBadge = document.getElementById('detailPayerBadge');
-    payerBadge.style.background = payer.color;
-    payerBadge.textContent = payerInitial(payer.name);
-    payerBadge.title = payer.name+'が立替';
+    document.getElementById('detailPayerDot').style.background = payer.color;
+    document.getElementById('detailPayerText').textContent = payer.name+'が立替';
 
     var list = document.getElementById('detailItemList');
     list.innerHTML = '';
@@ -1728,10 +1722,15 @@
     var wrap = document.getElementById('payerToggle');
     wrap.innerHTML = '';
     payers.forEach(function(p){
+      var isActive = p.id===state.selectedPayerId;
       var btn = document.createElement('div');
-      btn.className = 'payer-toggle-btn'+(p.id===state.selectedPayerId ? ' active' : '');
-      btn.innerHTML = '<span class="payer-toggle-dot" style="background:'+p.color+';"></span><span></span>';
-      btn.querySelector('span:last-child').textContent = p.name;
+      btn.className = 'payer-toggle-btn'+(isActive ? ' active' : '');
+      btn.textContent = p.name;
+      if(isActive){
+        btn.style.background = p.color;
+        btn.style.borderColor = p.color;
+        btn.style.color = payerTextColor(p.color);
+      }
       btn.addEventListener('click', function(){
         state.selectedPayerId = p.id;
         renderPayerToggle();
