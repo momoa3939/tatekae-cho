@@ -253,6 +253,12 @@
     font-weight:700;
     margin-bottom:12px;
   }
+  .summary-pair-card{ margin-bottom:4px; }
+  .summary-pair-label{
+    font-size:12px;
+    color:var(--ink-soft);
+    margin-bottom:6px;
+  }
   .summary-breakdown-row{
     display:flex;
     align-items:center;
@@ -1128,6 +1134,11 @@
       <div class="payer-toggle" id="payerToggle"></div>
     </div>
 
+    <div class="form-group" id="counterpartGroup">
+      <label class="form-label">相手</label>
+      <div class="payer-toggle" id="counterpartToggle"></div>
+    </div>
+
     <div class="form-group">
       <label class="form-label">品目</label>
       <div id="itemInputRows"></div>
@@ -1352,6 +1363,24 @@
     if(changed) saveRecords(records);
   }
 
+  /* 記録に「相手」の情報がない古いデータを、立て替え人以外の人に割り振る */
+  function migrateCounterpartIds(){
+    var records = loadRecords();
+    var payers = loadPayers();
+    if(payers.length < 2) return;
+    var changed = false;
+    records.forEach(function(r){
+      var valid = r.counterpartId && r.counterpartId!==r.payerId &&
+        payers.some(function(p){ return p.id===r.counterpartId; });
+      if(!valid){
+        var other = payers.filter(function(p){ return p.id!==r.payerId; })[0];
+        r.counterpartId = other ? other.id : null;
+        changed = true;
+      }
+    });
+    if(changed) saveRecords(records);
+  }
+
   /* ===== データ読み書き ===== */
   function loadRecords(){
     try{
@@ -1444,6 +1473,7 @@
     editingId: null,
     itemRowCount: 0,
     selectedPayerId: null,
+    selectedCounterpartId: null,
     editingPayerId: null,
     selectedColor: PAYER_COLORS[0]
   };
@@ -1564,39 +1594,61 @@
       return;
     }
 
-    var payers = loadPayers();
-    if(payers.length===2){
-      var totalsById = {};
-      payers.forEach(function(p){ totalsById[p.id] = 0; });
-      unpaidAll.forEach(function(r){
-        var pid = (r.payerId && totalsById.hasOwnProperty(r.payerId)) ? r.payerId : payers[0].id;
-        totalsById[pid] += recordTotal(r);
-      });
+    /* 立て替え人×相手のペアごとに未精算額を集計する */
+    var pairMap = {};
+    var pairOrder = [];
+    unpaidAll.forEach(function(r){
+      if(!r.payerId || !r.counterpartId || r.payerId===r.counterpartId) return;
+      var key = [r.payerId, r.counterpartId].sort().join('|');
+      if(!pairMap[key]){
+        pairMap[key] = { aId:r.payerId, bId:r.counterpartId, totals:{} };
+        pairOrder.push(key);
+      }
+      var pair = pairMap[key];
+      pair.totals[r.payerId] = (pair.totals[r.payerId]||0) + recordTotal(r);
+    });
+
+    pairOrder.forEach(function(key){
+      var pair = pairMap[key];
+      var pA = getPayerById(pair.aId);
+      var pB = getPayerById(pair.bId);
+      var totalA = pair.totals[pA.id]||0;
+      var totalB = pair.totals[pB.id]||0;
+
+      var card = document.createElement('div');
+      card.className = 'summary-pair-card';
+
+      var label = document.createElement('div');
+      label.className = 'summary-pair-label';
+      label.textContent = pA.name+' ⇄ '+pB.name;
+      card.appendChild(label);
 
       var splitDiv = document.createElement('div');
       splitDiv.className = 'summary-split';
-      payers.forEach(function(p){
+      [pA, pB].forEach(function(p, idx){
         var col = document.createElement('div');
         col.className = 'summary-split-col';
         col.innerHTML =
           '<div class="summary-split-label"><span class="summary-split-dot" style="background:'+p.color+';"></span>'+p.name+'が立替</div>'+
-          '<div class="summary-split-val">'+yen(totalsById[p.id])+'</div>';
+          '<div class="summary-split-val">'+yen(idx===0 ? totalA : totalB)+'</div>';
         splitDiv.appendChild(col);
       });
-      wrap.appendChild(splitDiv);
+      card.appendChild(splitDiv);
 
-      var diff = totalsById[payers[0].id] - totalsById[payers[1].id];
+      var diff = totalA - totalB;
       var netDiv = document.createElement('div');
       netDiv.className = 'summary-net';
       if(diff === 0){
         netDiv.textContent = '差し引き：ちょうど精算済みです';
       }else if(diff > 0){
-        netDiv.textContent = '差し引き：'+payers[1].name+' → '+payers[0].name+'へ '+yen(diff);
+        netDiv.textContent = '差し引き：'+pB.name+' → '+pA.name+'へ '+yen(diff);
       }else{
-        netDiv.textContent = '差し引き：'+payers[0].name+' → '+payers[1].name+'へ '+yen(-diff);
+        netDiv.textContent = '差し引き：'+pA.name+' → '+pB.name+'へ '+yen(-diff);
       }
-      wrap.appendChild(netDiv);
-    }
+      card.appendChild(netDiv);
+
+      wrap.appendChild(card);
+    });
 
     unpaidAll.forEach(function(r){
       var payer = getPayerById(r.payerId);
@@ -1734,6 +1786,41 @@
       btn.addEventListener('click', function(){
         state.selectedPayerId = p.id;
         renderPayerToggle();
+        renderCounterpartToggle();
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
+  function renderCounterpartToggle(){
+    var payers = loadPayers();
+    var candidates = payers.filter(function(p){ return p.id !== state.selectedPayerId; });
+    var group = document.getElementById('counterpartGroup');
+    if(candidates.length <= 1){
+      /* 登録者が2人以下なら相手は自動で決まるので選択UIは不要 */
+      state.selectedCounterpartId = candidates.length ? candidates[0].id : null;
+      group.style.display = 'none';
+      return;
+    }
+    group.style.display = '';
+    if(!state.selectedCounterpartId || !candidates.some(function(p){ return p.id===state.selectedCounterpartId; })){
+      state.selectedCounterpartId = candidates[0].id;
+    }
+    var wrap = document.getElementById('counterpartToggle');
+    wrap.innerHTML = '';
+    candidates.forEach(function(p){
+      var isActive = p.id===state.selectedCounterpartId;
+      var btn = document.createElement('div');
+      btn.className = 'payer-toggle-btn'+(isActive ? ' active' : '');
+      btn.textContent = p.name;
+      if(isActive){
+        btn.style.background = p.color;
+        btn.style.borderColor = p.color;
+        btn.style.color = payerTextColor(p.color);
+      }
+      btn.addEventListener('click', function(){
+        state.selectedCounterpartId = p.id;
+        renderCounterpartToggle();
       });
       wrap.appendChild(btn);
     });
@@ -1748,7 +1835,9 @@
     state.itemRowCount = 0;
     var payers = loadPayers();
     state.selectedPayerId = payers.length ? payers[0].id : null;
+    state.selectedCounterpartId = null;
     renderPayerToggle();
+    renderCounterpartToggle();
     addItemRow(); addItemRow();
     closeAutocomplete();
   }
@@ -1793,7 +1882,9 @@
     document.getElementById('memoInput').value = rec.memo || '';
     document.getElementById('formError').classList.remove('show');
     state.selectedPayerId = rec.payerId || null;
+    state.selectedCounterpartId = rec.counterpartId || null;
     renderPayerToggle();
+    renderCounterpartToggle();
     var wrap = document.getElementById('itemInputRows');
     wrap.innerHTML = '';
     state.itemRowCount = 0;
@@ -1846,6 +1937,7 @@
         rec.items = items;
         rec.memo = memo;
         rec.payerId = state.selectedPayerId;
+        rec.counterpartId = state.selectedCounterpartId;
       }
       saveRecords(records);
       bumpStoreStat(store);
@@ -1866,7 +1958,8 @@
         items: items,
         memo: memo,
         settled: false,
-        payerId: state.selectedPayerId
+        payerId: state.selectedPayerId,
+        counterpartId: state.selectedCounterpartId
       });
       saveRecords(records);
       bumpStoreStat(store);
@@ -2267,6 +2360,7 @@
 
   /* ===== 初期化 ===== */
   migratePayerIds();
+  migrateCounterpartIds();
   renderMonthDropdown();
   renderHome();
   showScreen('homeScreen');
