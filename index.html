@@ -172,12 +172,6 @@
     margin:0 24px 26px;
     text-align:left;
   }
-  .summary-label{
-    font-size:13.5px;
-    color:var(--ink-soft);
-    letter-spacing:.05em;
-    margin-bottom:10px;
-  }
   .summary-value{
     font-family:'Zen Maru Gothic', sans-serif;
     font-weight:700;
@@ -215,19 +209,66 @@
     transition:max-height .25s ease;
   }
   .summary-breakdown.open{
-    max-height:600px;
+    max-height:800px;
     margin-top:12px;
+  }
+  .summary-split{
+    display:flex;
+    gap:8px;
+    margin-bottom:8px;
+  }
+  .summary-split-col{
+    flex:1;
+    background:var(--card);
+    border:1px solid var(--line-card);
+    border-radius:12px;
+    padding:10px 12px;
+  }
+  .summary-split-label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-bottom:4px;
+  }
+  .summary-split-dot{
+    width:12px; height:12px;
+    border-radius:50%;
+    flex-shrink:0;
+  }
+  .summary-split-val{
+    font-size:17px;
+    font-weight:700;
+    color:var(--ink);
+  }
+  .summary-net{
+    background:#F4ECE3;
+    border:1px solid #F4ECE3;
+    border-radius:12px;
+    padding:11px 14px;
+    text-align:center;
+    font-size:13.5px;
+    color:var(--ink);
+    font-weight:700;
+    margin-bottom:12px;
   }
   .summary-breakdown-row{
     display:flex;
     align-items:center;
-    justify-content:space-between;
+    gap:10px;
     background:var(--card);
     border:1px solid var(--line-card);
     border-radius:12px;
     padding:11px 14px;
     margin-bottom:8px;
   }
+  .summary-breakdown-row .sb-dot{
+    width:18px; height:18px;
+    border-radius:50%;
+    flex-shrink:0;
+  }
+  .summary-breakdown-row .sb-info{ flex:1; }
   .summary-breakdown-row .sb-store{
     font-size:14px;
     color:var(--ink);
@@ -272,7 +313,18 @@
     background:var(--sage);
     flex-shrink:0;
   }
-  .status-dot.settled{ background:var(--gray-dot); }
+  .status-dot.settled{ opacity:0.35; }
+  .payer-badge{
+    width:22px; height:22px;
+    border-radius:50%;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:10.5px;
+    font-weight:700;
+    color:#3a2d18;
+  }
   .store-info{
     flex:1;
     min-width:0;
@@ -421,6 +473,22 @@
     align-items:center;
     justify-content:space-between;
     margin-bottom:22px;
+  }
+  .detail-badges{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .detail-payer-badge{
+    width:26px; height:26px;
+    border-radius:50%;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:11.5px;
+    font-weight:700;
+    color:#3a2d18;
   }
   .detail-date-badge{
     display:flex;
@@ -634,6 +702,81 @@
     cursor:pointer;
     margin-bottom:22px;
   }
+  .payer-toggle{
+    display:flex;
+    gap:6px;
+    background:var(--card);
+    border:1px solid var(--line-card);
+    border-radius:12px;
+    padding:4px;
+  }
+  .payer-toggle-btn{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:6px;
+    padding:10px 4px;
+    border-radius:9px;
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:13.5px;
+    color:var(--ink-soft);
+    cursor:pointer;
+  }
+  .payer-toggle-btn.active{ font-weight:700; color:var(--ink); }
+  .payer-toggle-dot{
+    width:9px; height:9px;
+    border-radius:50%;
+    flex-shrink:0;
+  }
+
+  /* 立て替える人：設定の一覧・編集 */
+  .payers-list{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    margin:6px 0 20px;
+  }
+  .payer-row{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:var(--card);
+    border:1px solid var(--line-card);
+    border-radius:14px;
+    padding:13px 16px;
+    cursor:pointer;
+  }
+  .payer-row:active{ transform:scale(0.99); }
+  .payer-dot{
+    width:22px; height:22px;
+    border-radius:50%;
+    flex-shrink:0;
+  }
+  .payer-name{
+    flex:1;
+    font-family:'Zen Maru Gothic', sans-serif;
+    font-size:15px;
+    color:var(--ink);
+  }
+  .color-swatch-row{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .color-swatch{
+    width:32px; height:32px;
+    border-radius:50%;
+    cursor:pointer;
+  }
+  .color-swatch.selected{
+    box-shadow:0 0 0 2px var(--bg), 0 0 0 4px var(--ink);
+  }
+  .color-swatch.used{
+    opacity:0.25;
+    cursor:not-allowed;
+  }
+
   .form-save-btn{
     display:block;
     width:100%;
@@ -766,6 +909,7 @@
     color:var(--ink);
     margin:0 0 20px;
     line-height:1.7;
+    white-space:pre-line;
   }
   .confirm-box .confirm-btns{
     display:flex;
@@ -944,7 +1088,10 @@
     </div>
 
     <div class="detail-summary-row">
-      <div class="detail-date-badge" id="detailDateBadge">6月5日（木）</div>
+      <div class="detail-badges">
+        <span class="detail-payer-badge" id="detailPayerBadge"></span>
+        <div class="detail-date-badge" id="detailDateBadge">6月5日（木）</div>
+      </div>
       <div class="detail-total-block">
         <div class="detail-total-label">合計</div>
         <div class="detail-total-value" id="detailTotalValue">¥560</div>
@@ -987,6 +1134,11 @@
     </div>
 
     <div class="form-group">
+      <label class="form-label">立て替えたのは</label>
+      <div class="payer-toggle" id="payerToggle"></div>
+    </div>
+
+    <div class="form-group">
       <label class="form-label">品目</label>
       <div id="itemInputRows"></div>
       <button type="button" class="add-item-btn" id="addItemRowBtn">＋ 品目を追加</button>
@@ -1012,6 +1164,16 @@
     </div>
 
     <div class="settings-list">
+      <div class="settings-card" id="goPayers">
+        <div class="settings-card-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+        <div class="settings-card-info">
+          <div class="settings-card-title">立て替える人</div>
+          <div class="settings-card-desc">名前・色の登録と管理</div>
+        </div>
+        <span class="chevron">›</span>
+      </div>
       <div class="settings-card" id="goMonthManage">
         <div class="settings-card-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="16" rx="3"></rect><line x1="16" y1="3" x2="16" y2="7"></line><line x1="8" y1="3" x2="8" y2="7"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
@@ -1028,7 +1190,7 @@
         </div>
         <div class="settings-card-info">
           <div class="settings-card-title">データのバックアップ</div>
-          <div class="settings-card-desc">ドライブなどに保存</div>
+          <div class="settings-card-desc">記録をJSONファイルで保存</div>
         </div>
         <span class="chevron">›</span>
       </div>
@@ -1043,7 +1205,42 @@
         <span class="chevron">›</span>
       </div>
     </div>
-    <input type="file" id="restoreFileInput" accept=".json,.txt,application/json,text/plain" style="display:none;">
+    <input type="file" id="restoreFileInput" accept="application/json" style="display:none;">
+  </div>
+
+  <!-- ===== 立て替える人：一覧画面 ===== -->
+  <div class="detail-app" id="payersScreen">
+    <div class="detail-topbar">
+      <button class="detail-back" id="payersBackBtn" aria-label="戻る">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="detail-store-name">立て替える人</div>
+      <div class="detail-edit-btn"></div>
+    </div>
+    <div class="payers-list" id="payersList"></div>
+    <button type="button" class="add-item-btn" id="addPayerBtn">＋ 人を追加</button>
+  </div>
+
+  <!-- ===== 立て替える人：追加・編集画面 ===== -->
+  <div class="detail-app" id="payerEditScreen">
+    <div class="detail-topbar">
+      <button class="detail-back" id="payerEditBackBtn" aria-label="戻る">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <div class="detail-store-name" id="payerEditTitle">人を追加</div>
+      <div class="detail-edit-btn"></div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">名前</label>
+      <input type="text" class="form-input" id="payerNameInput" placeholder="名前">
+    </div>
+    <div class="form-group">
+      <label class="form-label">色</label>
+      <div class="color-swatch-row" id="colorSwatchRow"></div>
+    </div>
+    <div class="form-error" id="payerFormError">名前を入力してください</div>
+    <button class="form-save-btn" id="savePayerBtn">保存する</button>
+    <button class="detail-delete-link" id="deletePayerBtn" style="display:none;">この人を削除する</button>
   </div>
 
   <!-- ===== 月の管理画面 ===== -->
@@ -1074,22 +1271,22 @@
         <button type="button" data-key="C">C</button>
         <button type="button" data-key="⌫">⌫</button>
         <button type="button" data-key="%">%</button>
-        <button type="button" data-key="÷" class="op">÷</button>
+        <button type="button" data-key="÷">÷</button>
         <button type="button" data-key="7">7</button>
         <button type="button" data-key="8">8</button>
         <button type="button" data-key="9">9</button>
-        <button type="button" data-key="×" class="op">×</button>
+        <button type="button" data-key="×">×</button>
         <button type="button" data-key="4">4</button>
         <button type="button" data-key="5">5</button>
         <button type="button" data-key="6">6</button>
-        <button type="button" data-key="−" class="op">−</button>
+        <button type="button" data-key="−">−</button>
         <button type="button" data-key="1">1</button>
         <button type="button" data-key="2">2</button>
         <button type="button" data-key="3">3</button>
-        <button type="button" data-key="＋" class="op">＋</button>
+        <button type="button" data-key="＋">＋</button>
         <button type="button" data-key="0" class="zero">0</button>
         <button type="button" data-key=".">.</button>
-        <button type="button" data-key="=" class="eq">=</button>
+        <button type="button" data-key="=">=</button>
       </div>
       <button type="button" class="calc-use-btn" id="calcUseBtn">この金額を入力する</button>
       <button type="button" class="calc-cancel-link" id="calcCancelBtn">キャンセル</button>
@@ -1106,6 +1303,54 @@
   /* ===== ストレージキー ===== */
   var REC_KEY = 'tatekaeCho_records';
   var STORE_KEY = 'tatekaeCho_storeStats';
+  var PAYER_KEY = 'tatekaeCho_payers';
+
+  var PAYER_COLORS = ['#B8C39E','#F0B058','#A27D7F','#8FA7C2','#C98FA0','#CDAE7C','#7E9E8C','#B3A2C7','#D98E73'];
+  var DEFAULT_PAYERS = [
+    { id:'husband', name:'主人', color:'#B8C39E' },
+    { id:'me', name:'私', color:'#F0B058' }
+  ];
+
+  function loadPayers(){
+    try{
+      var raw = localStorage.getItem(PAYER_KEY);
+      var payers = raw ? JSON.parse(raw) : null;
+      if(payers && payers.length) return payers;
+    }catch(e){}
+    savePayers(DEFAULT_PAYERS);
+    return DEFAULT_PAYERS.slice();
+  }
+  function savePayers(payers){
+    localStorage.setItem(PAYER_KEY, JSON.stringify(payers));
+  }
+  function getPayerById(id){
+    var payers = loadPayers();
+    var found = payers.filter(function(p){ return p.id===id; })[0];
+    if(found) return found;
+    return { id:null, name:'不明', color:'#C9C4B8' };
+  }
+  function payerInitial(name){
+    return (name||'？').slice(0,1);
+  }
+  function payerTextColor(bg){
+    return '#3a2d18';
+  }
+
+  /* 記録に立て替え人の情報がない古いデータを、最初の登録者に割り振る */
+  function migratePayerIds(){
+    var records = loadRecords();
+    var payers = loadPayers();
+    if(!payers.length) return;
+    var defaultId = payers[0].id;
+    var changed = false;
+    records.forEach(function(r){
+      if(!r.payerId || !payers.some(function(p){ return p.id===r.payerId; })){
+        r.payerId = defaultId;
+        changed = true;
+      }
+    });
+    if(changed) saveRecords(records);
+  }
 
   /* ===== データ読み書き ===== */
   function loadRecords(){
@@ -1181,7 +1426,7 @@
   }
 
   /* ===== 画面切り替え共通 ===== */
-  var screens = ['homeScreen','detailScreen','addScreen','settingsScreen','monthManageScreen'];
+  var screens = ['homeScreen','detailScreen','addScreen','settingsScreen','monthManageScreen','payersScreen','payerEditScreen'];
   function showScreen(id){
     screens.forEach(function(sid){
       var el = document.getElementById(sid);
@@ -1197,7 +1442,10 @@
     currentMonth: todayStr().slice(0,7),
     currentDetailId: null,
     editingId: null,
-    itemRowCount: 0
+    itemRowCount: 0,
+    selectedPayerId: null,
+    editingPayerId: null,
+    selectedColor: PAYER_COLORS[0]
   };
 
   /* ===== ホーム画面：月セレクター ===== */
@@ -1272,12 +1520,14 @@
 
     records.forEach(function(r){
       var total = recordTotal(r);
+      var payer = getPayerById(r.payerId);
 
       var card = document.createElement('div');
       card.className = 'store-card';
       card.setAttribute('data-id', r.id);
       card.innerHTML =
         '<span class="status-dot'+(r.settled?' settled':'')+'"></span>'+
+        '<span class="payer-badge"></span>'+
         '<div class="store-info">'+
           '<div class="store-name"></div>'+
           '<div class="store-date"></div>'+
@@ -1289,6 +1539,10 @@
           '</div>'+
           '<span class="chevron">›</span>'+
         '</div>';
+      card.querySelector('.status-dot').style.background = payer.color;
+      var badgeEl = card.querySelector('.payer-badge');
+      badgeEl.style.background = payer.color;
+      badgeEl.textContent = payerInitial(payer.name);
       card.querySelector('.store-name').textContent = r.store;
       card.querySelector('.store-date').textContent = dateLabelShort(r.date);
       card.querySelector('.store-amount').textContent = yen(total);
@@ -1313,15 +1567,53 @@
       wrap.innerHTML = '<div class="summary-breakdown-empty">未精算の記録はありません</div>';
       return;
     }
+
+    var payers = loadPayers();
+    if(payers.length===2){
+      var totalsById = {};
+      payers.forEach(function(p){ totalsById[p.id] = 0; });
+      unpaidAll.forEach(function(r){
+        var pid = (r.payerId && totalsById.hasOwnProperty(r.payerId)) ? r.payerId : payers[0].id;
+        totalsById[pid] += recordTotal(r);
+      });
+
+      var splitDiv = document.createElement('div');
+      splitDiv.className = 'summary-split';
+      payers.forEach(function(p){
+        var col = document.createElement('div');
+        col.className = 'summary-split-col';
+        col.innerHTML =
+          '<div class="summary-split-label"><span class="summary-split-dot" style="background:'+p.color+';"></span>'+p.name+'が立替</div>'+
+          '<div class="summary-split-val">'+yen(totalsById[p.id])+'</div>';
+        splitDiv.appendChild(col);
+      });
+      wrap.appendChild(splitDiv);
+
+      var diff = totalsById[payers[0].id] - totalsById[payers[1].id];
+      var netDiv = document.createElement('div');
+      netDiv.className = 'summary-net';
+      if(diff === 0){
+        netDiv.textContent = '差し引き：ちょうど精算済みです';
+      }else if(diff > 0){
+        netDiv.textContent = '差し引き：'+payers[1].name+' → '+payers[0].name+'へ '+yen(diff);
+      }else{
+        netDiv.textContent = '差し引き：'+payers[0].name+' → '+payers[1].name+'へ '+yen(-diff);
+      }
+      wrap.appendChild(netDiv);
+    }
+
     unpaidAll.forEach(function(r){
+      var payer = getPayerById(r.payerId);
       var row = document.createElement('div');
       row.className = 'summary-breakdown-row';
       row.innerHTML =
-        '<div>'+
+        '<span class="sb-dot"></span>'+
+        '<div class="sb-info">'+
           '<div class="sb-store"></div>'+
           '<div class="sb-date"></div>'+
         '</div>'+
         '<span class="sb-amt"></span>';
+      row.querySelector('.sb-dot').style.background = payer.color;
       row.querySelector('.sb-store').textContent = r.store;
       row.querySelector('.sb-date').textContent = dateLabelShort(r.date);
       row.querySelector('.sb-amt').textContent = yen(recordTotal(r));
@@ -1348,6 +1640,11 @@
     document.getElementById('detailStoreName').textContent = rec.store;
     document.getElementById('detailDateBadge').textContent = dateLabelWithWeek(rec.date);
     document.getElementById('detailTotalValue').textContent = yen(recordTotal(rec));
+    var payer = getPayerById(rec.payerId);
+    var payerBadge = document.getElementById('detailPayerBadge');
+    payerBadge.style.background = payer.color;
+    payerBadge.textContent = payerInitial(payer.name);
+    payerBadge.title = payer.name+'が立替';
 
     var list = document.getElementById('detailItemList');
     list.innerHTML = '';
@@ -1423,6 +1720,26 @@
   });
 
   /* ===== 記録追加・編集画面 ===== */
+  function renderPayerToggle(){
+    var payers = loadPayers();
+    if(!state.selectedPayerId || !payers.some(function(p){ return p.id===state.selectedPayerId; })){
+      state.selectedPayerId = payers.length ? payers[0].id : null;
+    }
+    var wrap = document.getElementById('payerToggle');
+    wrap.innerHTML = '';
+    payers.forEach(function(p){
+      var btn = document.createElement('div');
+      btn.className = 'payer-toggle-btn'+(p.id===state.selectedPayerId ? ' active' : '');
+      btn.innerHTML = '<span class="payer-toggle-dot" style="background:'+p.color+';"></span><span></span>';
+      btn.querySelector('span:last-child').textContent = p.name;
+      btn.addEventListener('click', function(){
+        state.selectedPayerId = p.id;
+        renderPayerToggle();
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
   function resetAddForm(){
     document.getElementById('storeInput').value = '';
     document.getElementById('dateInput').value = todayStr();
@@ -1430,6 +1747,9 @@
     document.getElementById('formError').classList.remove('show');
     document.getElementById('itemInputRows').innerHTML = '';
     state.itemRowCount = 0;
+    var payers = loadPayers();
+    state.selectedPayerId = payers.length ? payers[0].id : null;
+    renderPayerToggle();
     addItemRow(); addItemRow();
     closeAutocomplete();
   }
@@ -1473,6 +1793,8 @@
     document.getElementById('dateInput').value = rec.date;
     document.getElementById('memoInput').value = rec.memo || '';
     document.getElementById('formError').classList.remove('show');
+    state.selectedPayerId = rec.payerId || null;
+    renderPayerToggle();
     var wrap = document.getElementById('itemInputRows');
     wrap.innerHTML = '';
     state.itemRowCount = 0;
@@ -1524,6 +1846,7 @@
         rec.date = date;
         rec.items = items;
         rec.memo = memo;
+        rec.payerId = state.selectedPayerId;
       }
       saveRecords(records);
       bumpStoreStat(store);
@@ -1543,7 +1866,8 @@
         date: date,
         items: items,
         memo: memo,
-        settled: false
+        settled: false,
+        payerId: state.selectedPayerId
       });
       saveRecords(records);
       bumpStoreStat(store);
@@ -1617,6 +1941,129 @@
     showScreen('homeScreen');
   });
 
+  /* --- 立て替える人 --- */
+  document.getElementById('goPayers').addEventListener('click', function(){
+    renderPayersList();
+    showScreen('payersScreen');
+  });
+  document.getElementById('payersBackBtn').addEventListener('click', function(){
+    showScreen('settingsScreen');
+  });
+  function renderPayersList(){
+    var payers = loadPayers();
+    var list = document.getElementById('payersList');
+    list.innerHTML = '';
+    payers.forEach(function(p){
+      var row = document.createElement('div');
+      row.className = 'payer-row';
+      row.innerHTML =
+        '<span class="payer-dot" style="background:'+p.color+';"></span>'+
+        '<span class="payer-name"></span>'+
+        '<span class="chevron">›</span>';
+      row.querySelector('.payer-name').textContent = p.name;
+      row.addEventListener('click', function(){ openPayerEditForm(p.id); });
+      list.appendChild(row);
+    });
+  }
+
+  function usedPayerColors(excludeId){
+    return loadPayers()
+      .filter(function(p){ return p.id !== excludeId; })
+      .map(function(p){ return p.color; });
+  }
+  function firstUnusedColor(excludeId){
+    var used = usedPayerColors(excludeId);
+    var found = PAYER_COLORS.filter(function(c){ return used.indexOf(c)===-1; })[0];
+    return found || PAYER_COLORS[0];
+  }
+  function renderColorSwatches(){
+    var wrap = document.getElementById('colorSwatchRow');
+    wrap.innerHTML = '';
+    var used = usedPayerColors(state.editingPayerId);
+    PAYER_COLORS.forEach(function(c){
+      var isUsed = used.indexOf(c) !== -1;
+      var sw = document.createElement('div');
+      sw.className = 'color-swatch'
+        + (c===state.selectedColor ? ' selected' : '')
+        + (isUsed ? ' used' : '');
+      sw.style.background = c;
+      if(!isUsed){
+        sw.addEventListener('click', function(){
+          state.selectedColor = c;
+          renderColorSwatches();
+        });
+      }
+      wrap.appendChild(sw);
+    });
+  }
+
+  function openPayerAddForm(){
+    state.editingPayerId = null;
+    state.selectedColor = firstUnusedColor(null);
+    document.getElementById('payerEditTitle').textContent = '人を追加';
+    document.getElementById('payerNameInput').value = '';
+    document.getElementById('payerFormError').classList.remove('show');
+    document.getElementById('deletePayerBtn').style.display = 'none';
+    renderColorSwatches();
+    showScreen('payerEditScreen');
+  }
+  function openPayerEditForm(id){
+    var payers = loadPayers();
+    var p = payers.filter(function(x){ return x.id===id; })[0];
+    if(!p) return;
+    state.editingPayerId = id;
+    state.selectedColor = p.color;
+    document.getElementById('payerEditTitle').textContent = '人を編集';
+    document.getElementById('payerNameInput').value = p.name;
+    document.getElementById('payerFormError').classList.remove('show');
+    document.getElementById('deletePayerBtn').style.display = 'block';
+    renderColorSwatches();
+    showScreen('payerEditScreen');
+  }
+  document.getElementById('addPayerBtn').addEventListener('click', function(){
+    openPayerAddForm();
+  });
+  document.getElementById('payerEditBackBtn').addEventListener('click', function(){
+    showScreen('payersScreen');
+  });
+  document.getElementById('savePayerBtn').addEventListener('click', function(){
+    var name = document.getElementById('payerNameInput').value.trim();
+    var errEl = document.getElementById('payerFormError');
+    if(!name){
+      errEl.classList.add('show');
+      return;
+    }
+    errEl.classList.remove('show');
+
+    var payers = loadPayers();
+    if(state.editingPayerId){
+      var p = payers.filter(function(x){ return x.id===state.editingPayerId; })[0];
+      if(p){
+        p.name = name;
+        p.color = state.selectedColor;
+      }
+      savePayers(payers);
+      showToast('更新しました');
+    }else{
+      payers.push({ id: uid(), name: name, color: state.selectedColor });
+      savePayers(payers);
+      showToast('追加しました');
+    }
+    renderPayersList();
+    renderHome();
+    showScreen('payersScreen');
+  });
+  document.getElementById('deletePayerBtn').addEventListener('click', function(){
+    confirmDialog('この人を削除してもよいですか？\n（この人が立て替えた記録は残りますが、印の表示が「不明」になります）', function(){
+      var payers = loadPayers().filter(function(x){ return x.id!==state.editingPayerId; });
+      savePayers(payers);
+      renderPayersList();
+      renderHome();
+      showScreen('payersScreen');
+      showToast('削除しました');
+    });
+  });
+
   /* --- 月の管理 --- */
   document.getElementById('goMonthManage').addEventListener('click', function(){
     renderMonthManage();
@@ -1656,51 +2103,23 @@
   }
 
   /* --- バックアップ --- */
-  // スマホでは共有メニューを開いて「ドライブ」などに保存先を選べるようにする
-  // (共有機能は .json を受け付けないため、共有するときだけ .txt 形式にする。中身は同じ)
-  // 共有に対応していない環境では、今まで通りダウンロード保存
   document.getElementById('doBackup').addEventListener('click', function(){
     var data = {
       records: loadRecords(),
       storeStats: loadStoreStats(),
       exportedAt: new Date().toISOString()
     };
-    var json = JSON.stringify(data, null, 2);
-    var baseName = 'tatekaecho-backup-' + todayStr();
-
-    function downloadBackup(){
-      var blob = new Blob([json], { type: 'application/json' });
-      var url = URL.createObjectURL(blob);
-      var a = document.createElement('a');
-      a.href = url;
-      a.download = baseName + '.json';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
-      showToast('バックアップを書き出しました');
-    }
-
-    var file = null;
-    try{
-      file = new File([json], baseName + '.txt', { type: 'text/plain' });
-    }catch(err){
-      file = null;
-    }
-
-    if(file && navigator.canShare && navigator.canShare({ files: [file] })){
-      navigator.share({ files: [file], title: baseName }).then(function(){
-        showToast('バックアップを共有しました');
-      }).catch(function(err){
-        if(err && err.name === 'AbortError'){
-          showToast('バックアップをキャンセルしました');
-        }else{
-          downloadBackup();
-        }
-      });
-    }else{
-      downloadBackup();
-    }
+    var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    var d = new Date();
+    a.href = url;
+    a.download = 'tatekaecho-backup-'+d.getFullYear()+pad2(d.getMonth()+1)+pad2(d.getDate())+'.json';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    showToast('バックアップを書き出しました');
   });
 
   /* --- 復元 --- */
@@ -1848,6 +2267,7 @@
   });
 
   /* ===== 初期化 ===== */
+  migratePayerIds();
   renderMonthDropdown();
   renderHome();
   showScreen('homeScreen');
