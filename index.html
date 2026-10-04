@@ -207,10 +207,11 @@
     max-height:0;
     overflow:hidden;
     transition:max-height .25s ease;
+    margin:0 24px;
   }
   .summary-breakdown.open{
-    max-height:800px;
-    margin-top:12px;
+    max-height:4000px;
+    margin-bottom:26px;
   }
   .summary-split{
     display:flex;
@@ -1052,9 +1053,10 @@
         <span>全期間の未精算：<span class="summary-alltime-amt" id="allTimeUnpaid">¥0</span></span>
         <span class="summary-chev" id="allTimeChev"></span>
       </div>
-      <div class="summary-breakdown" id="allTimeBreakdown"></div>
     </div>
   </div>
+
+  <div class="summary-breakdown" id="allTimeBreakdown"></div>
 
   <div class="card-list" id="cardList"></div>
 
